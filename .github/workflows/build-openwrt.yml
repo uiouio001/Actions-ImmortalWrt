@@ -9,7 +9,7 @@
 #
 ###############手动修改##############
 
-name: RAX3000M-eMMC_XR30-eMMC-hanwckf
+name: Build OpenWrt
 
 on:
   repository_dispatch:
