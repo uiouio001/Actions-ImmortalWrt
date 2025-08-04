@@ -1,3 +1,4 @@
+#.mtwifi-cfg.config
 CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_mt7981=y
 CONFIG_TARGET_MULTI_PROFILE=y
