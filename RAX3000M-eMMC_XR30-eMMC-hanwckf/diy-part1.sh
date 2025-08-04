@@ -19,11 +19,9 @@ sed -i "s/OPENWRT_RELEASE.*/OPENWRT_RELEASE=\"%D %V ${date_version} by ${author}
 # Uncomment a feed source
 #sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
 
-# Add a feed source
+# 添加软件包仓库
 echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
 #echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
+#echo 'src-git openappfilter https://github.com/destan19/OpenAppFilter' >>feeds.conf.default
+#sed -i '$a src-git xmpackage https://github.com/xiaomeng9597/openwrt-packages2.git;main' feeds.conf.default
 
-# 拉取我的软件包仓库
-sed -i '$a src-git xmpackage https://github.com/xiaomeng9597/openwrt-packages2.git;main' feeds.conf.default
-#git clone https://github.com/messense/aliyundrive-webdav package/messense
-git clone https://github.com/destan19/OpenAppFilter package/OpenAppFilter
