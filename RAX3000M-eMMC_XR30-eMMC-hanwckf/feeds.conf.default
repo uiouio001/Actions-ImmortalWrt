@@ -10,5 +10,3 @@ src-git quickstart https://github.com/animegasan/luci-app-quickstart;main
 src-git-full third_party https://github.com/linkease/istore-packages.git;main
 src-git-full linkease_nas https://github.com/linkease/nas-packages.git;master
 src-git-full linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main
-src-git-full jjm2473_apps https://github.com/jjm2473/openwrt-apps.git;main
-src-git-full oaf https://github.com/jjm2473/OpenAppFilter.git;dev4
