@@ -17,6 +17,8 @@
 #安装helloworld插件
 echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
 #echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
+
+# Download source codes
 #git clone https://github.com/messense/aliyundrive-webdav package/messense
 #安装应用过滤(OAF)插件
 git clone https://github.com/destan19/OpenAppFilter package/OpenAppFilter
