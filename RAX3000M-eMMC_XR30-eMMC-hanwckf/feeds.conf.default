@@ -1,11 +1,11 @@
 #ImmortalWrt
-src-git-full packages https://github.com/lgs2007m/immortalwrt-mt798x-packages.git;openwrt-21.02
-src-git-full luci https://github.com/lgs2007m/immortalwrt-mt798x-luci.git;openwrt-21.02
-src-git-full routing https://github.com/openwrt/routing.git;openwrt-21.02
-src-git-full telephony https://github.com/openwrt/telephony.git;openwrt-21.02
+src-git packages https://github.com/lgs2007m/immortalwrt-mt798x-packages.git;openwrt-21.02
+src-git luci https://github.com/lgs2007m/immortalwrt-mt798x-luci.git;openwrt-21.02
+src-git routing https://github.com/openwrt/routing.git;openwrt-21.02
+src-git telephony https://github.com/openwrt/telephony.git;openwrt-21.02
 #iStoreOS
-src-git-full istore https://github.com/linkease/istore;main
-src-git-full quickstart https://github.com/animegasan/luci-app-quickstart;main
-src-git-full third_party https://github.com/linkease/istore-packages.git;main
-src-git-full linkease_nas https://github.com/linkease/nas-packages.git;master
-src-git-full linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main
+src-git istore https://github.com/linkease/istore;main
+src-git quickstart https://github.com/animegasan/luci-app-quickstart;main
+src-git third_party https://github.com/linkease/istore-packages.git;main
+src-git linkease_nas https://github.com/linkease/nas-packages.git;master
+src-git linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main
