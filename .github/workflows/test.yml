@@ -9,7 +9,7 @@
 #
 ###############手动修改##############
 
-name: Build OpenWrt
+name: Test Build
 
 on:
   repository_dispatch:
