@@ -143,9 +143,9 @@ jobs:
         swap-storage: true
 
 
-  - name: Build
-    run: |
-      echo "Free space:"
-      df -h
+    - name: Build
+      run: |
+        echo "Free space:"
+        df -h
 
       
