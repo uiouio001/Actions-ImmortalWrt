@@ -4,6 +4,14 @@
 # Description: OpenWrt DIY script part 2 (After Update feeds)
 #===============================================
 
+# 修改版本为编译日期，数字类型。
+date_version=$(date +"%Y%m%d%H")
+echo $date_version > version
+
+# 为固件版本加上编译作者
+author="OpenWrt"
+sed -i "s/DISTRIB_DESCRIPTION.*/DISTRIB_DESCRIPTION='%D %V ${date_version} by ${author}'/g" package/base-files/files/etc/openwrt_release
+sed -i "s/OPENWRT_RELEASE.*/OPENWRT_RELEASE=\"%D %V ${date_version} by ${author}\"/g" package/base-files/files/usr/lib/os-release
 
 # 修改默认登录IP
 #sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generate
