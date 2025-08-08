@@ -19,64 +19,13 @@ on:
         description: 'Set LAN IP Address'
         required: true
         default: '192.168.1.1'
-      WIFI_DRIVER:
-        description: 'Choose WiFi Driver'
-        required: true
-        default: 'v7.6.7.2-fw-20240823(recommend)'
-        type: choice
-        options:
-        - v7.6.7.2-fw-20240823(recommend)
-        - v7.6.6.1-fw-20230306(recommend)
-        - v7.6.7.2-fw-default
-        - v7.6.7.2-fw-20230306
-        - v7.6.7.2-fw-20230330
-        - v7.6.7.2-fw-20230411
-        - v7.6.7.2-fw-20230717
-        - v7.6.7.2-fw-20231024
-        - v7.6.6.1-fw-default
-        - v7.6.6.1-fw-20230330
-        - v7.6.6.1-fw-20230411
-        - v7.6.6.1-fw-20230717
-        - v7.6.6.1-fw-20231024
-        - v7.6.6.1-fw-20240823
-      EEPROM:
-        description: 'Use nx30pro eeprom and fixed WiFi MAC address'
-        required: true
-        default: true
-        type: boolean
-      APP_MTK:
-        description: 'Use luci-app-mtk wifi config'
-        required: true
-        default: false
-        type: boolean
-      NO_DOCKERMAN:
-        description: 'Do Not build luci-app-dockerman'
-        required: true
-        default: false
-        type: boolean
-      ssh:
-        description: 'SSH connection to Actions'
-        required: false
-        default: 'false'
 #  schedule:
 #    - cron: 0 16 * * *
 
 env:
-  ###############手动修改##############
-  ##因为是两个设备，所以手动设置上传时候的打包名称和tag名称UPLOAD_TAG_NAME
-  OPENWRT_NAME: hanwckf
-  UPLOAD_TAG_NAME: rax3000m-emmc_xr30-emmc
+  UPLOAD_TAG_NAME: rax3000m-emmc
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
   REPO_BRANCH: openwrt-21.02
-  FEEDS_CONF: RAX3000M-eMMC_XR30-eMMC-hanwckf/feeds.conf.default
-  RAX3000M_EMMC_DTS_FILE: target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m-emmc.dts
-  CONFIG_FILE: RAX3000M-eMMC_XR30-eMMC-hanwckf/.config
-  DIY_P1_SH: RAX3000M-eMMC_XR30-eMMC-hanwckf/diy-part1.sh
-  DIY_P2_SH: RAX3000M-eMMC_XR30-eMMC-hanwckf/diy-part2.sh
-  SSH_ACTIONS: false
-  UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: true
-  TZ: Asia/Shanghai
 
 jobs:
   build:
@@ -86,75 +35,10 @@ jobs:
       contents: write
 
     steps:
-    - name: 检查项目分支
-      uses: actions/checkout@main
-
-    - name: 初始化编译环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        echo "------------------------------- 更新并安装依赖 -------------------------------"
-        docker rmi $(docker images -q) 2>/dev/null
-        [[ -n "${AGENT_TOOLSDIRECTORY}" ]] && sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc 2>/dev/null
-        sudo swapoff -a
-        sudo rm -f /swapfile /mnt/swapfile
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
-        #sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
-        #sudo -E apt-get -qq install $(cat $GITHUB_WORKSPACE/depends/${{ matrix.os }})
-        sudo -E apt-get -qq install $(curl -fsSL https://tinyurl.com/ubuntu2204-make-openwrt)
-        wget https://bootstrap.pypa.io/pip/3.6/get-pip.py
-        sudo python3 get-pip.py
-        sudo rm -rf get-pip.py
-        sudo pip install pyelftools
-        sudo -E systemctl daemon-reload
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
-        sudo rm -rf ~/{.cargo,.dotnet,.rustup}
-        sudo timedatectl set-timezone "$TZ"
-        echo "------------------------------- 设置工作目录及时区 -------------------------------"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
-
-    - name:  使用逻辑卷扩大 Github Actions 编译空间(使用逻辑卷扩大编译空间从84G至110G左右)
-      run: |
-        mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
-        root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
-        sudo truncate -s "${mnt_size}"G /mnt/mnt.img
-        sudo truncate -s "${root_size}"G /root.img
-        sudo losetup /dev/loop6 /mnt/mnt.img
-        sudo losetup /dev/loop7 /root.img
-        sudo pvcreate /dev/loop6
-        sudo pvcreate /dev/loop7
-        sudo vgcreate github /dev/loop6 /dev/loop7
-        sudo lvcreate -n runner -l 100%FREE github
-        sudo mkfs.xfs /dev/github/runner
-        sudo mkdir -p /builder
-        sudo mount /dev/github/runner /builder
-        sudo chown -R runner.runner /builder
-        df -Th
-    
-    - name: 清理磁盘空间(Ubuntu)
-      uses: jlumbroso/free-disk-space@main
+    - name: 准备阶段：缓存加速
+      uses: klever1988/cachewrtbuild@main
       with:
-        # this might remove tools that are actually needed,
-        # when set to "true" but frees about 6 GB
-        tool-cache: true
-        
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        swap-storage: true
-
-
-    - name: Build
-      run: |
-        echo "Free space:"
-        df -h
-
+        ccache: 'true'  # 启用 ccache，加速构建
+        mixkey: 'mt7981'  # 设置目标平台为 R5S 使用的 ramips
+        prefix: ${{ github.workspace }}/openwrt  #  使用的源码前缀
       
