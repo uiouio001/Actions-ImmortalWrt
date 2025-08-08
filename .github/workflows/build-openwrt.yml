@@ -92,7 +92,7 @@ jobs:
     strategy:
       matrix:
         REPO_BRANCH:
-          - ${{ env.REPO_BRANCH }}
+          - openwrt-21.02
         ARCHITECTURE:
           - cortexa53
         OS:
