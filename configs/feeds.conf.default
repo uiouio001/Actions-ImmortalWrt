@@ -6,5 +6,4 @@ src-git telephony https://github.com/openwrt/telephony.git;openwrt-21.02
 #iStoreOS
 src-git istore https://github.com/linkease/istore;main
 src-git third_party https://github.com/linkease/istore-packages.git;main
-src-git linkease_nas https://github.com/linkease/nas-packages.git;master
 src-git linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main
