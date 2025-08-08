@@ -8,6 +8,12 @@
 # 修改默认登录IP
 #sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generate
 
+# 修改默认wifi名称ssid为 旧版本修改
+#sed -i 's/ssid=OpenWrt/ssid=ChinaUnicom-BB4A/g' package/kernel/mac80211/files/lib/wifi/mac80211.sh
+sed -i 's/ssid='.*'/ssid='ChinaUnicom-BB4A'/g' ./package/kernel/mac80211/files/lib/wifi/mac80211.sh
+# 修改默认wifi名称ssid为 hanwckf源码修改 ssid="ImmortalWrt-2.4G"
+sed -i 's/ssid='.*'/ssid='ChinaUnicom-BB4A'/g' ./package/mtk/applications/mtwifi-cfg/files/mtwifi.sh
+
 # 修改默认主题
 sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 sed -i 's/config internal themes/config internal themes\n    option Argon  \"\/luci-static\/argon\"/g' feeds/luci/modules/luci-base/root/etc/config/luci
