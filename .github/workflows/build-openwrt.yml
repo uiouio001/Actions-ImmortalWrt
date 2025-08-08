@@ -70,7 +70,7 @@ on:
 env:
   ###############手动修改##############
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
-  REPO_BRANCH: ${{ matrix.REPO_BRANCH }}
+  REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: configs/feeds.conf.default
   CONFIG_FILE: configs/.config
   DIY_P1_SH: scripts/diy-part1.sh
@@ -92,7 +92,7 @@ jobs:
     strategy:
       matrix:
         REPO_BRANCH:
-          - openwrt-21.02
+          - ${{ env.REPO_BRANCH }}
         ARCHITECTURE:
           - cortexa53
         OS:
