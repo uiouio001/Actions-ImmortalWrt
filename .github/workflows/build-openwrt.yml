@@ -181,7 +181,7 @@ jobs:
       with:
         ccache: 'true'  # 启用 ccache，加速构建
         mixkey: 'mt7981'  # 设置目标平台为 R5S 使用的 ramips
-        prefix: ${{ env.WORK_DIR }}  # ${{ github.workspace }}/openwrt 使用的源码前缀
+        prefix: ${{ github.workspace }}/openwrt  #  使用的源码前缀
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
