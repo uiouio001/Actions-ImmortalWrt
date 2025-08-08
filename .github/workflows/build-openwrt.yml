@@ -176,12 +176,12 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     
-    - name: 准备阶段：缓存构建动作
+    - name: 准备阶段：缓存加速
       uses: klever1988/cachewrtbuild@main
       with:
-        ccache: 'true'
-        mixkey: 'openwrt21-cortexa53'
-        prefix: ${{ github.workspace }}/openwrt
+        ccache: 'true'  # 启用 ccache，加速构建
+        mixkey: 'mt7981'  # 设置目标平台为 R5S 使用的 ramips
+        prefix: ${{ env.WORK_DIR }}  # ${{ github.workspace }}/openwrt 使用的源码前缀
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
