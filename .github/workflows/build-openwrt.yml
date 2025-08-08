@@ -9,7 +9,7 @@
 #
 ###############手动修改##############
 
-name: Build ImmortalWrt-mt798x
+name: Build ImmortalWrt
 
 on:
   repository_dispatch:
