@@ -55,7 +55,7 @@ on:
         default: false
         type: boolean
       DO_NOT_BUILD_DOCKERMAN:
-        description: 'Build luci-app-dockerman'
+        description: 'Donot Build luci-app-dockerman'
         required: true
         default: false
         type: boolean
