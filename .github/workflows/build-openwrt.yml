@@ -180,8 +180,8 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
-        mixkey: ${{ matrix.OS }}-${{ matrix.ARCHITECTURE }}-${{ matrix.REPO_BRANCH }}
-        prefix: $GITHUB_WORKSPACE/openwrt
+        mixkey: 'openwrt21-cortexa53'
+        prefix: ${{ github.workspace }}/openwrt
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
@@ -404,7 +404,7 @@ jobs:
         echo "release_tag=${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}" >> $GITHUB_OUTPUT
         echo "status=success" >> ${GITHUB_OUTPUT}
 
-    - name: 发布固件至Release
+    - name: 发布阶段：发布固件至Release
       uses: softprops/action-gh-release@v2.1.0
       if: steps.tag.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       env:
@@ -415,7 +415,7 @@ jobs:
         tag_name: ${{ env.FILE_DATE }}
         body_path: release.txt
     
-    - name: 删除旧发布的固件
+    - name: 发布阶段：删除旧发布的固件
       uses: dev-drprasad/delete-older-releases@master
       if: steps.compile.outputs.status == 'success' &&  env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
@@ -424,7 +424,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: 删除旧的编译过程
+    - name: 发布阶段：删除旧的编译过程
       uses: Mattraks/delete-workflow-runs@main
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
