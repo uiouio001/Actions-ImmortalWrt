@@ -9,7 +9,7 @@
 #
 ###############手动修改##############
 
-name: Build OpenWrt
+name: Build ImmortalWrt-mt798x
 
 on:
   repository_dispatch:
@@ -19,8 +19,8 @@ on:
         description: 'Set LAN IP Address'
         required: true
         default: '192.168.1.1'
-      WIFI_DRIVER:
-        description: 'Choose WiFi Driver'
+      WIFI_DRIVER_VERSION:
+        description: 'Choose WiFi Driver Version'
         required: true
         default: 'v7.6.7.2-fw-20240823(recommend)'
         type: choice
@@ -39,97 +39,74 @@ on:
         - v7.6.6.1-fw-20230717
         - v7.6.6.1-fw-20231024
         - v7.6.6.1-fw-20240823
-      EEPROM:
+      USE_NX30PRO_EEPROM:
         description: 'Use nx30pro eeprom and fixed WiFi MAC address'
         required: true
         default: true
         type: boolean
-      APP_MTK:
+      USE_MTWIFI_CFG:
         description: 'Use luci-app-mtk wifi config'
         required: true
         default: true
         type: boolean
-      NO_DOCKERMAN:
-        description: 'Do Not build luci-app-dockerman'
+      USE_52MHZ:
+        description: 'Use 52MHz max-frequency'
         required: true
         default: false
         type: boolean
-      ssh:
+      DO_NOT_BUILD_DOCKERMAN:
+        description: 'Build luci-app-dockerman'
+        required: true
+        default: false
+        type: boolean
+      SSH_TO_GITHUB_ACTIONS:
         description: 'SSH connection to Actions'
         required: false
-        default: 'false'
+        default: false
+        type: boolean
 #  schedule:
 #    - cron: 0 16 * * *
 
 env:
   ###############手动修改##############
-  ##因为是两个设备，所以手动设置上传时候的打包名称和tag名称UPLOAD_TAG_NAME
-  UPLOAD_TAG_NAME: rax3000m-emmc_xr30-emmc
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
-  REPO_BRANCH: openwrt-21.02
-  FEEDS_CONF: RAX3000M-eMMC_XR30-eMMC-hanwckf/feeds.conf.default
-  RAX3000M_EMMC_DTS_FILE: target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m-emmc.dts
-  CONFIG_FILE: RAX3000M-eMMC_XR30-eMMC-hanwckf/.config
-  DIY_P1_SH: RAX3000M-eMMC_XR30-eMMC-hanwckf/diy-part1.sh
-  DIY_P2_SH: RAX3000M-eMMC_XR30-eMMC-hanwckf/diy-part2.sh
-  SSH_ACTIONS: false
+  REPO_BRANCH: ${{ matrix.REPO_BRANCH }}
+  FEEDS_CONF: configs/feeds.conf.default
+  CONFIG_FILE: configs/.config
+  DIY_P1_SH: scripts/diy-part1.sh
+  DIY_P2_SH: scripts/diy-part2.sh
+  FREE_DISK_SH: scripts/free-disk-space.sh
+  DEPENDS_SH: scripts/environment.sh
+  CLASH_CORE_SH: scripts/preset-clash-core.sh
+  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
+  OPENWRT_NAME: immortalwrt
+  UPLOAD_TAG_NAME: mt7981-cmcc-rax3000m-emmc
   TZ: Asia/Shanghai
+  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      matrix:
+        REPO_BRANCH:
+          - openwrt-21.02
+        ARCHITECTURE:
+          - cortexa53
+        OS:
+          - ubuntu-22.04
+      fail-fast: false
 
     permissions:
       contents: write
 
     steps:
-    - name: 检查项目分支
+    - name: 初始化阶段：检查项目分支
       uses: actions/checkout@main
 
-    - name: 初始化编译环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        echo "------------------------------- 更新并安装依赖 -------------------------------"
-        docker rmi `docker images -q`
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /etc/mysql /etc/php
-        sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install libfuse-dev $(curl -fsSL git.io/depends-ubuntu-2204)
-        #sudo -E apt-get -qq install $(cat $GITHUB_WORKSPACE/depends/${{ matrix.os }})
-        #安装python3
-        #wget https://bootstrap.pypa.io/pip/3.6/get-pip.py
-        #sudo python3 get-pip.py
-        #sudo rm -rf get-pip.py
-        #sudo pip install pyelftools
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        echo "------------------------------- 设置工作目录及时区 -------------------------------"
-        sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
-
-    - name:  使用逻辑卷扩大 Github Actions 编译空间
-      run: |
-        mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
-        root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
-        sudo truncate -s "${mnt_size}"G /mnt/mnt.img
-        sudo truncate -s "${root_size}"G /root.img
-        sudo losetup /dev/loop6 /mnt/mnt.img
-        sudo losetup /dev/loop7 /root.img
-        sudo pvcreate /dev/loop6
-        sudo pvcreate /dev/loop7
-        sudo vgcreate github /dev/loop6 /dev/loop7
-        sudo lvcreate -n runner -l 100%FREE github
-        sudo mkfs.xfs /dev/github/runner
-        sudo mkdir -p /builder
-        sudo mount /dev/github/runner /builder
-        sudo chown -R runner.runner /builder
-        df -Th
-
-    - name: 清理磁盘空间(Ubuntu)
+    - name: 初始化阶段：清理磁盘空间
       uses: jlumbroso/free-disk-space@main
       with:
         # this might remove tools that are actually needed,
@@ -144,42 +121,85 @@ jobs:
         large-packages: true
         swap-storage: true
 
-    - name: 下载固件源码
-      #working-directory: /workdir
-      working-directory: /builder
+    - name: 初始化阶段：使用逻辑卷扩大 Github Actions 编译空间
+      run: |
+        mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
+        root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
+        sudo truncate -s "${mnt_size}"G /mnt/mnt.img
+        sudo truncate -s "${root_size}"G /root.img
+        sudo losetup /dev/loop6 /mnt/mnt.img
+        sudo losetup /dev/loop7 /root.img
+        sudo pvcreate /dev/loop6
+        sudo pvcreate /dev/loop7
+        sudo vgcreate github /dev/loop6 /dev/loop7
+        sudo lvcreate -n runner -l 100%FREE github
+        # 创建文件系统并挂载
+        sudo mkfs.xfs /dev/github/runner
+        sudo mkdir -p /workdir
+        sudo mount /dev/github/runner /workdir
+        sudo chown -R $USER:$GROUPS /workdir
+        df -Th
+
+    - name: 初始化阶段：检查服务器配置和磁盘空间情况
+      run: |
+        # 删除大文件和文件夹
+        chmod +x $FREE_DISK_SH && $FREE_DISK_SH
+
+        echo "若分配的服务器性能不足，务必及时取消，重新运行！"
+        echo -e "------------------------------- CPU信息 -------------------------------\n"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息: $(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo -e "------------------------------- 内存信息 -------------------------------\n"
+        echo "已安装内存详细信息: "
+        sudo lshw -short -C memory | grep GiB
+        echo -e "\n"
+        echo -e "------------------------------- 磁盘信息 -------------------------------\n"
+        echo -e "磁盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
+        echo "------------------------------- 磁盘详情 -------------------------------\n"
+        df -Th
+
+    - name: 初始化阶段：设置编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get -qq update -y
+        sudo -E apt-get -qq full-upgrade -y
+        chmod +x DEPENDS_SH && DEPENDS_SH
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+
+    - name: 准备阶段：克隆固件源码
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+    
+    - name: 准备阶段：缓存构建动作
+      uses: klever1988/cachewrtbuild@main
+      with:
+        ccache: 'true'
+        mixkey: ${{ matrix.OS }}-${{ matrix.ARCHITECTURE }}-${{ matrix.REPO_BRANCH }}
+        prefix: $GITHUB_WORKSPACE/openwrt
 
-    - name: 加载feeds.conf.default & DIY_P1_SH
+    - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
+        chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH && $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: 更新 & 安装 feeds
-      run: |
-        cd openwrt
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
+    - name: 准备阶段：更新 feeds
+      run: cd openwrt && ./scripts/feeds update -a
 
-    - name: 加载config & DIY_P2_SH
+    - name: 准备阶段：安装 feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: 准备阶段：加载config & 执行自定义脚本DIY_P2_SH
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_P2_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
+        chmod +x $GITHUB_WORKSPACE/$DIY_P2_SH && $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: 设置RAX3000M-eMMC的eMMC使用highspeed
-      run: |
-        cd openwrt
-        if ! grep -q 'cap-mmc-highspeed' "${{ env.RAX3000M_EMMC_DTS_FILE }}"; then
-                sed -i -e '/bus-width = <8>;/ a\	cap-mmc-highspeed;' "${{ env.RAX3000M_EMMC_DTS_FILE }}"
-        fi
-
-    - name: 设置LAN IP地址（路由器登录地址）
+    - name: 准备阶段：设置LAN IP地址（路由器登录地址）
       run: |
         cd openwrt
         SET_IP=${{ github.event.inputs.LAN_IP }}
@@ -193,11 +213,11 @@ jobs:
             echo "Invalid IP address, use default."
         fi
 
-    - name: 设置WiFi驱动版本
+    - name: 准备阶段：设置WiFi驱动版本
       run: |
         cd openwrt
-        wifi_driver=$(echo "${{ github.event.inputs.WIFI_DRIVER }}" | sed -E 's/^(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-        firmware=$(echo "${{ github.event.inputs.WIFI_DRIVER }}" | sed -E 's/.*fw-([0-9]{8}|default).*/\1/g')
+        wifi_driver=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/^(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+        firmware=$(echo "${{ github.event.inputs.WIFI_DRIVER_VERSION }}" | sed -E 's/.*fw-([0-9]{8}|default).*/\1/g')
         if [ "$wifi_driver" == "v7.6.6.1" ]; then
                 sed -i 's/CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7672=y/CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7661=y/g' .config
         fi
@@ -208,8 +228,8 @@ jobs:
         fi
         echo "Use WiFi Driver: $wifi_driver-fw-$firmware"
 
-    - name: 使用nx30pro的高功率eeprom并固定WiFi MAC地址
-      if: github.event.inputs.EEPROM == 'true'
+    - name: 准备阶段：设置是否使用nx30pro的高功率eeprom, 并固定WiFi MAC地址
+      if: github.event.inputs.USE_NX30PRO_EEPROM == 'true'
       run: |
         cd openwrt
         wifi_driver=$(echo "${{ github.event.inputs.WIFI_DRIVER }}" | sed -E 's/^(v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
@@ -227,8 +247,8 @@ jobs:
         sed -i '/mediatek_setup_macs()/,/\};/ {/cmcc,rax3000m-emmc)/ {n;n;n;r temp_insert.txt
         }}' target/linux/mediatek/mt7981/base-files/etc/board.d/02_network
 
-    - name: 使用luci-app-mtk无线配置
-      if: github.event.inputs.APP_MTK == 'true'
+    - name: 准备阶段：设置无线控制界面样式(luci-app-mtk)
+      if: github.event.inputs.USE_MTWIFI_CFG == 'true'
       run: |
         cd openwrt
         sed -i 's/CONFIG_PACKAGE_luci-app-mtwifi-cfg=y/CONFIG_PACKAGE_luci-app-mtk=y/g' .config
@@ -236,35 +256,63 @@ jobs:
         sed -i 's/CONFIG_PACKAGE_mtwifi-cfg=y/CONFIG_PACKAGE_wifi-profile=y/g' .config
         sed -i 's/CONFIG_PACKAGE_lua-cjson=y/CONFIG_WIFI_NORMAL_SETTING=y/g' .config
 
-    - name: 取消编译dockerman
-      if: github.event.inputs.NO_DOCKERMAN == 'true'
+    - name: 准备阶段：设置RAX3000M的eMMC闪存使用52MHZ高频率
+      if: github.event.inputs.USE_52MHZ == 'true'
+      env:
+        RAX3000M_EMMC_DTS_FILE: target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m-emmc.dts
+      run: |
+        cd openwrt
+        if ! grep -q 'cap-mmc-highspeed' "${{ env.RAX3000M_EMMC_DTS_FILE }}"; then
+                sed -i -e '/bus-width = <8>;/ a\	cap-mmc-highspeed;' "${{ env.RAX3000M_EMMC_DTS_FILE }}"
+        fi
+
+    - name: 准备阶段：设置是否取消编译luci-app-dockerman
+      if: github.event.inputs.DO_NOT_BUILD_DOCKERMAN == 'true'
       run: |
         cd openwrt
         sed -i '/CONFIG_PACKAGE_luci-app-dockerman=y/d' .config
 
-    - name: SSH链接管理
+    - name: 准备阶段：是否允许通过SSH 连接到 Github Actions
+      if: github.event.inputs.SSH_TO_GITHUB_ACTIONS == 'true'
       uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      with:
+        mode: ngrok
       env:
+        # After sign up on the https://ngrok.com
+        # You can find this token here: https://dashboard.ngrok.com/auth/your-authtoken
+        NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
+    
+        # ngrok server region [us, eu, au, ap, sa, jp, in] (optional, default: us)
+        # You can find this server region here: https://ngrok.com/docs#global-locations
+        NGROK_REGION: us
+
+        # This password you will use when authorizing via SSH
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+
+        # Send connection info to Telegram (optional)
+        # You can find related documents here: https://core.telegram.org/bots
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-    - name: 下载安装包
+    - name: 编译阶段：下载安装包
       id: package
       run: |
         cd openwrt
+        # 添加OpenClash核心
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE && $GITHUB_WORKSPACE/$CLASH_CORE
         make defconfig
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译固件
+    - name: 编译阶段：开始编译固件
       id: compile
       run: |
+        # 执行编译
         cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
-        
+        echo -e "$(($(nproc)+1)) thread compile"
+        make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+        # 编译后添加环境变量
         sed -n 's/.*lan) ipad=${ipaddr:-"\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\)"} ;;.*/\1/p' package/base-files/files/bin/config_generate | head -n 1 > IP_ADDR
         [ -s IP_ADDR ] && echo "IP_ADDR=$(cat IP_ADDR)" >> $GITHUB_ENV
         if grep -q 'CONFIG_MTK_MT_WIFI_DRIVER_VERSION_7661=y' .config; then
@@ -287,86 +335,100 @@ jobs:
         else
                 echo "BUILD_DOCKERMAN=" >> $GITHUB_ENV
         fi
-        echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 查看磁盘使用情况
+    - name: 编辑阶段：查看磁盘使用情况
       if: (!cancelled())
       run: df -hT
 
-    - name: 整理文件并重命名
+    - name: 发布阶段：上传固件目录到Actions Artifacts
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true' && !cancelled()
+      with:
+        name: OpenWrt_bin${{ env.FILE_DATE }}
+        path: openwrt/bin
+
+    - name: 发布阶段：整理固件文件
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: | 
-        mapfile -t devices < <(grep '^CONFIG_TARGET_DEVICE.*=y' openwrt/.config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+        #mapfile -t devices < <(grep '^CONFIG_TARGET_DEVICE.*=y' openwrt/.config | sed -r 's/.*DEVICE_(.*)=y/\1/')
+        #cd openwrt/bin/targets/*/*
+        #rm -rf packages
+        #sudo -E apt-get -qq install rename
+        #for val in "${devices[@]}"; do
+        #  rename "s/.*${val}/${{ env.FILE_DATE }}-${val}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}/" *
+        #  echo "$val"
+        #done
         cd openwrt/bin/targets/*/*
+        rm -rf *.buildinfo 
+        rm -rf *.json 
+        rm -rf *.manifest 
         rm -rf packages
-        sudo -E apt-get -qq install rename
-        for val in "${devices[@]}"; do
-          rename "s/.*${val}/${{ env.FILE_DATE }}-${val}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}/" *
-          echo "$val"
-        done
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 打包上传固件到Actions Artifacts
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: ${{ env.FILE_DATE }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}
-        path: ${{ env.FIRMWARE }}
-
-    - name: 生成固件Release标签
+    - name: 发布阶段：生成固件发布标签
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         touch release.txt
-        echo "- 使用源码：${{ env.REPO_URL }}" >> release.txt
-        echo "- 使用分支：${{ env.REPO_BRANCH }}" >> release.txt
-        echo "- 登录地址：${{ env.IP_ADDR }}" >> release.txt
-        echo "- 使用WiFi驱动${{ github.event.inputs.WIFI_DRIVER }}" >> release.txt
+        echo -e "${{ UPLOAD_TAG_NAME }}" >> release.txt
+        echo "- 💻 CPU架构: ${{ matrix.ARCHITECTURE }}" >> release.txt
+        echo "- 📂 使用源码：${{ env.REPO_URL }}" >> release.txt
+        echo "- 🌳 使用分支：${{ matrix.REPO_BRANCH }}" >> release.txt
+        echo "- ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")" >> release.txt
+        echo "- 🌐 登录地址: ${{ env.IP_ADDR }}" >> release.txt
+        echo "- 👤 用户名: root" >> release.txt
+        echo "- 🔒 密码: password" >> release.txt
+        echo "- 📒 说明1: 单网口设备默认网口为LAN，旁路由模式，需要接入主路由器后进后台查找对应IP地址访问，反之双网口设备默认网口为WAN+LAN，主路由模式。 " >> release.txt
+        echo "- 📒 说明2: 使用WiFi驱动${{ github.event.inputs.WIFI_DRIVER }}" >> release.txt
         if [[ "${{ env.EEPROM }}" == '-eeprom' ]]; then
-               echo "- 使用nx30pro高功率eeprom并固定WiFi MAC地址" >> release.txt
+               echo "-    使用nx30pro高功率eeprom并固定WiFi MAC地址" >> release.txt
         else
-               echo "- 未使用nx30pro高功率eeprom未固定WiFi MAC地址" >> release.txt
+               echo "-    未使用nx30pro高功率eeprom未固定WiFi MAC地址" >> release.txt
         fi
         if [[ "${{ env.WIFI_INTERFACE }}" == '-mtwifi' ]]; then
-                echo "- 使用hanwckf mtwifi-cfg原生luci无线配置工具" >> release.txt
+                echo "-    使用hanwckf mtwifi-cfg原生无线控制界面" >> release.txt
         else
-                echo "- 使用mtk-sdk luci-app-mtk无线配置工具" >> release.txt
+                echo "-    使用mtk-sdk luci-app-mtk无线控制界面" >> release.txt
         fi
-        if [[ "${{ env.BUILD_DOCKERMAN }}" == '-docker' ]]; then
-                echo "- 已编译luci-app-dockerman" >> release.txt
+        if [[ "${{ env.DO_NOT_BUILD_DOCKERMAN }}" == '-docker' ]]; then
+                echo "-    已编译luci-app-dockerman" >> release.txt
         else
-                echo "- 未编译luci-app-dockerman" >> release.txt
+                echo "-    未编译luci-app-dockerman" >> release.txt
         fi
+        max_frequency=$(($(grep -oP "max-frequency = <\K[0-9]*" openwrt/target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m-emmc.dts) / 1000000))
+        echo "-    使用闪存频率: ${max_frequency}MHz" >> release.txt
         echo "release_tag=${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}" >> $GITHUB_OUTPUT
-        echo "status=success" >> $GITHUB_OUTPUT
+        echo "status=success" >> ${GITHUB_OUTPUT}
 
     - name: 发布固件至Release
       uses: softprops/action-gh-release@v2.1.0
-      if: steps.tag.outputs.status == 'success' && !cancelled()
+      if: steps.tag.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: ${{ env.FIRMWARE }}/*
         name: ${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}
-        tag_name: ${{ steps.tag.outputs.release_tag }}
+        tag_name: ${{ env.FILE_DATE }}
         body_path: release.txt
+    
+    - name: 删除旧发布的固件
+      uses: dev-drprasad/delete-older-releases@master
+      if: steps.compile.outputs.status == 'success' &&  env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 7
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: 删除旧的编译过程
       uses: Mattraks/delete-workflow-runs@main
       with:
-        retain_days: 0
-        keep_minimum_runs: 2
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        retain_days: 1
+        keep_minimum_runs: 3
 
-    - name: 删除旧的发布版本
-      uses: dev-drprasad/delete-older-releases@master
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 3
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      
