@@ -23,9 +23,23 @@ on:
 #    - cron: 0 16 * * *
 
 env:
-  UPLOAD_TAG_NAME: rax3000m-emmc
+  ###############手动修改##############
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
   REPO_BRANCH: openwrt-21.02
+  FEEDS_CONF: configs/feeds.conf.default
+  CONFIG_FILE: configs/.config
+  DIY_P1_SH: scripts/diy-part1.sh
+  DIY_P2_SH: scripts/diy-part2.sh
+  FREE_DISK_SH: scripts/free-disk-space.sh
+  DEPENDS_SH: scripts/environment.sh
+  CLASH_CORE_SH: scripts/preset-clash-core.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
+  OPENWRT_NAME: immortalwrt
+  UPLOAD_TAG_NAME: mt7981-cmcc-rax3000m-emmc
+  TZ: Asia/Shanghai
+  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
 jobs:
   build:
@@ -35,10 +49,37 @@ jobs:
       contents: write
 
     steps:
-    - name: 准备阶段：缓存加速
-      uses: klever1988/cachewrtbuild@main
-      with:
-        ccache: 'true'  # 启用 ccache，加速构建
-        mixkey: 'mt7981'  # 设置目标平台为 R5S 使用的 ramips
-        prefix: ${{ github.workspace }}/openwrt  #  使用的源码前缀
-      
+    - name: 初始化阶段：使用逻辑卷扩大 Github Actions 编译空间
+      run: |
+        mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
+        root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
+        sudo truncate -s "${mnt_size}"G /mnt/mnt.img
+        sudo truncate -s "${root_size}"G /root.img
+        sudo losetup /dev/loop6 /mnt/mnt.img
+        sudo losetup /dev/loop7 /root.img
+        sudo pvcreate /dev/loop6
+        sudo pvcreate /dev/loop7
+        sudo vgcreate github /dev/loop6 /dev/loop7
+        sudo lvcreate -n runner -l 100%FREE github
+        # 创建文件系统并挂载
+        sudo mkfs.xfs /dev/github/runner
+        sudo mkdir -p /workdir
+        sudo mount /dev/github/runner /workdir
+        sudo chown -R $USER:$GROUPS /workdir
+        df -Th
+
+    - name: 准备阶段：克隆固件源码
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        echo "GITHUB_WORKSPACE：$GITHUB_WORKSPACE\n"
+        echo "{{ github.workspace }}：${{ github.workspace }}\n"
+        echo "FEEDS_CONF：$FEEDS_CONF\n"
+        echo "CONFIG_FILE：$CONFIG_FILE\n"
+
+    - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        #[ -e files ] && mv files openwrt/.config
+        chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH && $GITHUB_WORKSPACE/$DIY_P1_SH
