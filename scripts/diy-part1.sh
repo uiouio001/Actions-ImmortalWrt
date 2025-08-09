@@ -5,7 +5,10 @@
 #===============================================
 
 # 添加feed源地址
-#sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
-
-
+# 常用源
+sed -i '1i src-git kenzo https://github.com/kenzok8/openwrt-packages;master' feeds.conf.default
+#Argon Theme
+sed -i '1i src-git argon https://github.com/jerrykuku/luci-theme-argon.git;master' feeds.conf.default
+#OpenClash
+sed -i '1i src-git openclash https://github.com/vernesong/OpenClash.git;master' feeds.conf.default
 
