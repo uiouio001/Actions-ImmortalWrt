@@ -175,6 +175,10 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        echo "GITHUB_WORKSPACE：$GITHUB_WORKSPACE\n"
+        echo "{{ github.workspace }}：${{ github.workspace }}\n"
+        echo "FEEDS_CONF：$FEEDS_CONF\n"
+        echo "CONFIG_FILE：$CONFIG_FILE\n"
     
     - name: 准备阶段：缓存加速
       uses: klever1988/cachewrtbuild@main
@@ -185,8 +189,8 @@ jobs:
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
-        #[ -e $GITHUB_WORKSPACE/$FEEDS_CONF ] && mv $GITHUB_WORKSPACE/$FEEDS_CONF openwrt/feeds.conf.default
-        [ -e files ] && mv files openwrt/.config
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        #[ -e files ] && mv files openwrt/.config
         chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH && $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: 准备阶段：更新 feeds
@@ -197,8 +201,8 @@ jobs:
 
     - name: 准备阶段：加载config & 执行自定义脚本DIY_P2_SH
       run: |
-        #[ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        [ -e files ] && mv files openwrt/.config
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        #[ -e files ] && mv files openwrt/.config
         chmod +x $GITHUB_WORKSPACE/$DIY_P2_SH && $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: 准备阶段：设置LAN IP地址（路由器登录地址）
