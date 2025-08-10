@@ -63,16 +63,16 @@ jobs:
         sudo lvcreate -n runner -l 100%FREE github
         # 创建文件系统并挂载
         sudo mkfs.xfs /dev/github/runner
-        sudo mkdir -p /workdir
-        sudo mount /dev/github/runner /workdir
-        sudo chown -R $USER:$GROUPS /workdir
+        sudo mkdir -p /builder
+        sudo mount /dev/github/runner /builder
+        sudo chown -R $USER:$GROUPS /builder
         df -Th
 
     - name: 准备阶段：克隆固件源码
-      working-directory: /workdir
+      working-directory: /builder
       run: |
         df -hT $PWD
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         echo "GITHUB_WORKSPACE：$GITHUB_WORKSPACE\n"
         echo "{{ github.workspace }}：${{ github.workspace }}\n"
         echo "FEEDS_CONF：$FEEDS_CONF\n"
@@ -81,7 +81,7 @@ jobs:
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        #[ -e files ] && mv files openwrt/.config
+        [ -e files ] && mv files openwrt/files
         #chmod +x $DIY_P1_SH && $GITHUB_WORKSPACE/$DIY_P1_SH
         chmod +x $DIY_P1_SH
         cd openwrt
