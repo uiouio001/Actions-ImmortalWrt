@@ -89,8 +89,14 @@ jobs:
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         echo "ls openwrt"
         ls openwrt
+        echo "ls $GITHUB_WORKSPACE"
+        ls $GITHUB_WORKSPACE
         echo "ls $GITHUB_WORKSPACE/openwrt"
         ls $GITHUB_WORKSPACE/openwrt
+        echo "ls $GITHUB_WORKSPACE/scripts"
+        ls $GITHUB_WORKSPACE/scripts
+        echo "ls $GITHUB_WORKSPACE/configs"
+        ls $GITHUB_WORKSPACE/configs
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
