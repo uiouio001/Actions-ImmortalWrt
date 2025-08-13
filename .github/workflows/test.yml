@@ -62,7 +62,8 @@ jobs:
         sudo vgcreate github /dev/loop6 /dev/loop7
         sudo lvcreate -n runner -l 100%FREE github
         # 创建文件系统并挂载
-        sudo mkfs.xfs /dev/github/runner
+        # sudo mkfs.xfs /dev/github/runner
+        sudo mkfs.ext4 /dev/github/runner
         sudo mkdir -p /builder
         sudo mount /dev/github/runner /builder
         sudo chown -R $USER:$GROUPS /builder
@@ -88,8 +89,8 @@ jobs:
       run: |
         df -hT $PWD
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        ls $GITHUB_WORKSPACE
+        ls $GITHUB_WORKSPACE/openwrt
         chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-        echo "ls openwrt:"
-        ls openwrt
