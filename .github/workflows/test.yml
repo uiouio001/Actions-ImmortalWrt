@@ -84,6 +84,7 @@ jobs:
         sudo mkdir -p /openwrt
         sudo chown $USER:$GROUPS /openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+        ls $GITHUB_WORKSPACE
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
