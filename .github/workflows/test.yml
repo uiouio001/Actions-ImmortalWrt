@@ -93,4 +93,3 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-        echo "ls GITHUB_WORKSPACE: ${{ GITHUB_WORKSPACE/DIY_P1_SH }}"
