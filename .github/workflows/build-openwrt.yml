@@ -106,19 +106,6 @@ jobs:
     - name: 初始化阶段：检出项目分支
       uses: actions/checkout@main
 
-    - name: 初始化阶段：设置编译环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo -E apt-get -qq update -y
-        sudo -E apt-get -qq full-upgrade -y
-        chmod +x DEPENDS_SH && DEPENDS_SH
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo timedatectl set-timezone "$TZ"
-        #sudo mkdir -p /workdir
-        #sudo chown $USER:$GROUPS /workdir
-
     - name: 初始化阶段：使用逻辑卷扩大 Github Actions 编译空间
       run: |
         mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
@@ -138,6 +125,19 @@ jobs:
         sudo mount /dev/github/runner /builder
         sudo chown -R $USER:$GROUPS /builder
         df -Th
+
+    - name: 初始化阶段：设置编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get -qq update -y
+        sudo -E apt-get -qq full-upgrade -y
+        chmod +x DEPENDS_SH && DEPENDS_SH
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        #sudo mkdir -p /workdir
+        #sudo chown $USER:$GROUPS /workdir
     
     - name: 初始化阶段：清理磁盘空间
       uses: jlumbroso/free-disk-space@main
