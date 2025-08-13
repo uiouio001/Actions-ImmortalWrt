@@ -78,26 +78,26 @@ jobs:
       working-directory: /workdir
       run: |
         #df -hT $PWD
-        echo "\nls /:"
+        echo "ls /:"
         ls /
-        echo "\nls /workdir1:"
+        echo "ls /workdir1:"
         ls /workdir
-        sudo mkdir -p /openwrt
-        sudo chown $USER:$GROUPS /openwrt
+        sudo mkdir -p openwrt
+        sudo chown $USER:$GROUPS openwrt
 
-        echo "\nls /workdir2:"
+        echo "ls /workdir2:"
         ls /workdir
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        echo "\nls $GITHUB_WORKSPACE:"
+        echo "ls $GITHUB_WORKSPACE:"
         ls $GITHUB_WORKSPACE
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
-        echo "\nls /openwrt1:"
-        ls /openwrt
+        echo "ls /openwrt1:"
+        ls openwrt
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH
+        chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-        echo "\nls /openwrt2:"
-        ls /openwrt
+        echo "ls /openwrt2:"
+        ls openwrt
