@@ -63,9 +63,9 @@ jobs:
         sudo lvcreate -n runner -l 100%FREE github
         # 创建文件系统并挂载
         sudo mkfs.xfs /dev/github/runner
-        sudo mkdir -p /workdir
-        sudo mount /dev/github/runner /workdir
-        sudo chown -R $USER:$GROUPS /workdir
+        sudo mkdir -p /builder
+        sudo mount /dev/github/runner /builder
+        sudo chown -R $USER:$GROUPS /builder
         df -Th
         
     - name: 初始化阶段：设置编译环境
@@ -73,14 +73,16 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
 
     - name: 准备阶段：克隆固件源码
-      working-directory: /workdir
+      working-directory: /builder
       run: |
         df -hT $PWD
         sudo mkdir -p openwrt
         sudo chown $USER:$GROUPS openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
