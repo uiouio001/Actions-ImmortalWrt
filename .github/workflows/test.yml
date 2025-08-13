@@ -77,24 +77,27 @@ jobs:
     - name: 准备阶段：克隆固件源码
       working-directory: /workdir
       run: |
-        df -hT $PWD
-        echo "ls /workdir1:"
+        #df -hT $PWD
+        echo "\nls /:"
+        ls /
+        echo "\nls /workdir1:"
         ls /workdir
         sudo mkdir -p /openwrt
         sudo chown $USER:$GROUPS /openwrt
-        echo "ls /workdir2:"
+
+        echo "\nls /workdir2:"
         ls /workdir
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        echo "ls $GITHUB_WORKSPACE:"
+        echo "\nls $GITHUB_WORKSPACE:"
         ls $GITHUB_WORKSPACE
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
-        echo "ls /openwrt1:"
+        echo "\nls /openwrt1:"
         ls /openwrt
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-        echo "ls /openwrt2:"
+        echo "\nls /openwrt2:"
         ls /openwrt
