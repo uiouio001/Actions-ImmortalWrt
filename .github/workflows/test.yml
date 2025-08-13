@@ -49,6 +49,9 @@ jobs:
       contents: write
 
     steps:
+    - name: 初始化阶段：检查项目分支
+      uses: actions/checkout@main
+    
     - name: 初始化阶段：设置编译环境
       id: init
       env:
