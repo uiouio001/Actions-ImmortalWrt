@@ -103,7 +103,7 @@ jobs:
       contents: write
 
     steps:
-    - name: 初始化阶段：检查项目分支
+    - name: 初始化阶段：检出项目分支
       uses: actions/checkout@main
 
     - name: 初始化阶段：清理磁盘空间
