@@ -80,10 +80,10 @@ jobs:
         df -hT $PWD
         sudo mkdir -p /openwrt
         sudo chown $USER:$GROUPS /openwrt
-        echo "ls workdir:"
-        ls workdir
+        echo "ls /workdir:"
+        ls /workdir
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        echo "ls GITHUB_WORKSPACE:"
+        echo "ls $GITHUB_WORKSPACE:"
         ls $GITHUB_WORKSPACE
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
@@ -92,5 +92,5 @@ jobs:
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-        echo "ls openwrt:"
-        ls openwrt
+        echo "ls /openwrt:"
+        ls /openwrt
