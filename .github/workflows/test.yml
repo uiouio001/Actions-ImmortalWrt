@@ -67,6 +67,14 @@ jobs:
         sudo mount /dev/github/runner /builder
         sudo chown -R $USER:$GROUPS /builder
         df -Th
+        
+    - name: 初始化阶段：设置编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
 
     - name: 准备阶段：克隆固件源码
       working-directory: /builder
@@ -74,6 +82,7 @@ jobs:
         df -hT $PWD
         #git clone $REPO_URL -b $REPO_BRANCH openwrt
         sudo mkdir -p /openwrt
+        sudo chown $USER:$GROUPS /openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
