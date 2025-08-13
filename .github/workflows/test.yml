@@ -72,16 +72,14 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
+        #git clone $REPO_URL -b $REPO_BRANCH openwrt
+        sudo mkdir -p /openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
-        echo "GITHUB_WORKSPACE：$GITHUB_WORKSPACE\n"
-        echo "{{ github.workspace }}：${{ github.workspace }}\n"
-        echo "FEEDS_CONF：$FEEDS_CONF\n"
-        echo "CONFIG_FILE：$CONFIG_FILE\n"
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        [ -e files ] && mv files openwrt/files
+        #[ -e files ] && mv files openwrt/files
         #chmod +x $DIY_P1_SH && $GITHUB_WORKSPACE/$DIY_P1_SH
         chmod +x $DIY_P1_SH
         cd openwrt
