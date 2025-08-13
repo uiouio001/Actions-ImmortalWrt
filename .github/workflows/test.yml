@@ -24,8 +24,8 @@ on:
 
 env:
   ###############手动修改##############
-  REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
-  REPO_BRANCH: openwrt-21.02
+  REPO_URL: https://github.com/uiouio/test
+  REPO_BRANCH: main
   FEEDS_CONF: configs/feeds.conf.default
   CONFIG_FILE: configs/.config
   DIY_P1_SH: scripts/diy-part1.sh
@@ -83,8 +83,9 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        sudo mkdir -p openwrt
-        sudo chown $USER:$GROUPS openwrt
+        #sudo mkdir -p openwrt
+        #sudo chown $USER:$GROUPS openwrt
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
