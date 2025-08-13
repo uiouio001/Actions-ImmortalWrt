@@ -87,9 +87,9 @@ jobs:
         #sudo chown $USER:$GROUPS openwrt
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
-        echon "ls openwrt"
+        echo "ls openwrt"
         ls openwrt
-        echon "ls $GITHUB_WORKSPACE/openwrt"
+        echo "ls $GITHUB_WORKSPACE/openwrt"
         ls $GITHUB_WORKSPACE/openwrt
 
     - name: 准备阶段：加载feeds.conf.default & 执行自定义脚本DIY_P1_SH
