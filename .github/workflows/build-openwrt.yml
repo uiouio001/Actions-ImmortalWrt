@@ -118,9 +118,8 @@ jobs:
         sudo pvcreate /dev/loop7
         sudo vgcreate github /dev/loop6 /dev/loop7
         sudo lvcreate -n runner -l 100%FREE github
-        # 创建文件系统并挂载
-        # sudo mkfs.xfs /dev/github/runner
-        sudo mkfs.ext4 /dev/github/runner
+        # 创建文件系统并挂载(xfs格式/ext4格式)
+        sudo mkfs.xfs /dev/github/runner
         sudo mkdir -p /builder
         sudo mount /dev/github/runner /builder
         sudo chown -R $USER:$GROUPS /builder
