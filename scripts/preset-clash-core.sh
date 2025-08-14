@@ -34,10 +34,10 @@ wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
 wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
 
 # Country.mmdb
-COUNTRY_LITE_URL=https://raw.githubusercontent.com/alecthw/mmdb_china_ip_list/release/lite/Country.mmdb
-# COUNTRY_FULL_URL=https://raw.githubusercontent.com/alecthw/mmdb_china_ip_list/release/Country.mmdb
-wget -qO- $COUNTRY_LITE_URL > files/etc/openclash/Country.mmdb
-# wget -qO- $COUNTRY_FULL_URL > files/etc/openclash/Country.mmdb
+# COUNTRY_LITE_URL=https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country-lite.mmdb
+COUNTRY_FULL_URL=https://github.com/alecthw/mmdb_china_ip_list/releases/download/202508110312/Country.mmdb
+#wget -qO- $COUNTRY_LITE_URL > files/etc/openclash/Country.mmdb
+wget -qO- $COUNTRY_FULL_URL > files/etc/openclash/Country.mmdb
 
 
 #添加OpenClash dev版内核
