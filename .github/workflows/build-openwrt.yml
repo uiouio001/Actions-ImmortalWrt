@@ -198,13 +198,20 @@ jobs:
     - name: 准备阶段：安装 feeds
       run: cd openwrt && ./scripts/feeds install -a
 
-    - name: 准备阶段：加载config & 执行自定义脚本DIY_P2_SH
+    - name: 准备阶段：导入补丁文件 & 加载config & 执行自定义脚本DIY_P2_SH
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
+        
+    - name: 准备阶段：添加OpenClash核心
+      run: |
+        df -hT $PWD
+        chmod +x $CLASH_CORE
+        cd openwrt
+        $GITHUB_WORKSPACE/$CLASH_CORE
 
     - name: 准备阶段：设置LAN IP地址（路由器登录地址）
       run: |
@@ -305,9 +312,6 @@ jobs:
       id: package
       run: |
         cd openwrt
-        # 添加OpenClash核心
-        #chmod +x $GITHUB_WORKSPACE/$CLASH_CORE && $GITHUB_WORKSPACE/$CLASH_CORE
-        chmod +x $CLASH_CORE && $CLASH_CORE
         make defconfig
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
