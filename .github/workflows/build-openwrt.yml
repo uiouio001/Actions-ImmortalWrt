@@ -209,9 +209,9 @@ jobs:
     - name: 准备阶段：添加OpenClash核心
       run: |
         df -hT $PWD
-        chmod +x $CLASH_CORE
+        chmod +x $CLASH_CORE_SH
         cd openwrt
-        $GITHUB_WORKSPACE/$CLASH_CORE
+        $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
     - name: 准备阶段：设置LAN IP地址（路由器登录地址）
       run: |
