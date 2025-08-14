@@ -97,12 +97,12 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: 编译阶段：下载安装包
+    - name: 编译阶段：添加OpenClash核心
       id: package
       run: |
         df -hT $PWD
-        # 添加OpenClash核心
-        #chmod +x $GITHUB_WORKSPACE/$CLASH_CORE && $GITHUB_WORKSPACE/$CLASH_CORE
-        chmod +x $CLASH_CORE
         cd openwrt
-        $GITHUB_WORKSPACE/$CLASH_CORE
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE && $GITHUB_WORKSPACE/$CLASH_CORE
+        #chmod +x $CLASH_CORE
+        #cd openwrt
+        #$GITHUB_WORKSPACE/$CLASH_CORE
