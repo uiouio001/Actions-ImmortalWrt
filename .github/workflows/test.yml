@@ -101,7 +101,8 @@ jobs:
       id: package
       run: |
         df -hT $PWD
-        cd openwrt
         # 添加OpenClash核心
         #chmod +x $GITHUB_WORKSPACE/$CLASH_CORE && $GITHUB_WORKSPACE/$CLASH_CORE
-        chmod +x $CLASH_CORE && $CLASH_CORE
+        chmod +x $CLASH_CORE
+        cd openwrt
+        $GITHUB_WORKSPACE/$CLASH_CORE
