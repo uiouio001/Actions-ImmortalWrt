@@ -96,7 +96,7 @@ jobs:
         ARCHITECTURE:
           - cortexa53
         OS:
-          - ubuntu-21.04
+          - ubuntu-latest
       fail-fast: false
 
     permissions:
