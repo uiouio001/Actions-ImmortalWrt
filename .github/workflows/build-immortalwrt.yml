@@ -375,7 +375,7 @@ jobs:
         rm -rf packages
 
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "FIRMWARE_NAME=${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}" >> $GITHUB_ENV
+        echo "FIRMWARE_NAME=${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}-${{ env.FILE_DATE }}" >> $GITHUB_ENV
         # 重命名
         #sudo -E apt-get -qq install rename
         #for val in "${devices[@]}"; do
