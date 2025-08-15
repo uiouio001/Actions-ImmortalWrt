@@ -16,3 +16,5 @@ src-git quickstart https://github.com/animegasan/luci-app-quickstart.git;main
 src-git third_party https://github.com/linkease/istore-packages.git;main
 src-git linkease_nas https://github.com/linkease/nas-packages.git;master
 src-git linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main
+#Luci support of LingTi Game Accelerator
+src-git linkease_nas_luci https://github.com/esirplayground/LingTiGameAcc.git;master
