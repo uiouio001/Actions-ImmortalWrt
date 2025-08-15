@@ -375,11 +375,11 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "FIRMWARE_NAME=${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}" >> $GITHUB_ENV
         # 重命名
-        sudo -E apt-get -qq install rename
-        for val in "${devices[@]}"; do
-          rename "s/.*${val}/${{ env.FIRMWARE_NAME }}/" *
-          echo "$val"
-        done
+        #sudo -E apt-get -qq install rename
+        #for val in "${devices[@]}"; do
+        #  rename "s/.*${val}/${{ env.FIRMWARE_NAME }}/" *
+        #  echo "$val"
+        #done
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 发布阶段：生成固件发布标签
