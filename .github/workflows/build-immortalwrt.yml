@@ -47,7 +47,7 @@ on:
       USE_MTWIFI_CFG:
         description: 'Use luci-app-mtk wifi config'
         required: true
-        default: true
+        default: false
         type: boolean
       USE_52MHZ:
         description: 'Use 52MHz max-frequency'
@@ -174,11 +174,11 @@ jobs:
         df -Th
 
     - name: 准备阶段：克隆固件源码
-      working-directory: /builder
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     
     - name: 准备阶段：缓存加速
       uses: klever1988/cachewrtbuild@main
