@@ -100,7 +100,8 @@ jobs:
       fail-fast: false
 
     permissions:
-      contents: write
+      actions: write
+      contents: read
 
     steps:
     - name: 初始化阶段：检出项目分支
@@ -331,7 +332,7 @@ jobs:
         else
                 echo "WIFI_VERSION=-v7672" >> $GITHUB_ENV
         fi
-        if [ ${{ github.event.inputs.EEPROM }} == 'true' ]; then
+        if [ ${{ github.event.inputs.USE_NX30PRO_EEPROM }} == 'true' ]; then
                 echo "EEPROM=-eeprom" >> $GITHUB_ENV
         else
                 echo "EEPROM=" >> $GITHUB_ENV
@@ -346,7 +347,7 @@ jobs:
         else
                 echo "BUILD_DOCKERMAN=" >> $GITHUB_ENV
         fi
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 编辑阶段：查看磁盘使用情况
@@ -392,9 +393,9 @@ jobs:
         echo "- ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")" >> release.txt
         echo "- 🌐 登录地址: ${{ env.IP_ADDR }}" >> release.txt
         echo "- 👤 用户名: root" >> release.txt
-        echo "- 🔒 密码: password" >> release.txt
-        echo "- 📒 说明1: 单网口设备默认网口为LAN，旁路由模式，需要接入主路由器后进后台查找对应IP地址访问，反之双网口设备默认网口为WAN+LAN，主路由模式。 " >> release.txt
-        echo "- 📒 说明2: 使用WiFi驱动${{ github.event.inputs.WIFI_DRIVER }}" >> release.txt
+        echo "- 🔒 密码: null" >> release.txt
+        echo "- 📒 说明: 单网口设备默认网口为LAN，旁路由模式，需要接入主路由器后进后台查找对应IP地址访问，反之双网口设备默认网口为WAN+LAN，主路由模式。 " >> release.txt
+        echo "- 使用WiFi驱动${{ github.event.inputs.WIFI_DRIVER }}" >> release.txt
         if [[ "${{ env.EEPROM }}" == '-eeprom' ]]; then
                echo "-    使用nx30pro高功率eeprom并固定WiFi MAC地址" >> release.txt
         else
@@ -405,14 +406,14 @@ jobs:
         else
                 echo "-    使用mtk-sdk luci-app-mtk无线控制界面" >> release.txt
         fi
-        if [[ "${{ env.DO_NOT_BUILD_DOCKERMAN }}" == '-docker' ]]; then
+        if [[ "${{ env.BUILD_DOCKERMAN }}" == '-docker' ]]; then
                 echo "-    已编译luci-app-dockerman" >> release.txt
         else
                 echo "-    未编译luci-app-dockerman" >> release.txt
         fi
         max_frequency=$(($(grep -oP "max-frequency = <\K[0-9]*" openwrt/target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m-emmc.dts) / 1000000))
         echo "-    使用闪存频率: ${max_frequency}MHz" >> release.txt
-        echo "release_tag=${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}" >> $GITHUB_OUTPUT
+        echo "release_tag=${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}" >> $GITHUB_OUTPUT
         echo "status=success" >> ${GITHUB_OUTPUT}
 
     - name: 发布阶段：发布固件至Release
@@ -423,7 +424,7 @@ jobs:
       with:
         files: ${{ env.FIRMWARE }}/*
         name: ${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}${{ env.WIFI_VERSION }}${{ env.EEPROM }}${{ env.BUILD_DOCKERMAN }}
-        tag_name: ${{ env.FILE_DATE }}
+        tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
     
     - name: 发布阶段：删除旧发布的固件
@@ -434,12 +435,12 @@ jobs:
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: 发布阶段：删除旧的编译过程
-      uses: Mattraks/delete-workflow-runs@main
+      uses: Mattraks/delete-workflow-runs@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ github.token }}
         repository: ${{ github.repository }}
-        retain_days: 1
-        keep_minimum_runs: 3
+        retain_days: 30
+        keep_minimum_runs: 6
 
