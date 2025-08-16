@@ -290,7 +290,7 @@ jobs:
 
     - name: 准备阶段：是否允许通过SSH 连接到 Github Actions
       if: github.event.inputs.SSH_TO_GITHUB_ACTIONS == 'true'
-      uses: P3TERX/ssh2actions@v1.0.0
+      uses: uiouio/ssh2actions@main
       with:
         mode: ngrok
       env:
@@ -304,11 +304,6 @@ jobs:
     
         # This password you will use when authorizing via SSH
         SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-    
-        # Send connection info to Telegram (optional)
-        # You can find related documents here: https://core.telegram.org/bots
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     - name: 编译阶段：下载安装包
       id: package
