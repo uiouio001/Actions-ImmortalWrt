@@ -69,7 +69,13 @@ jobs:
         sudo -E apt-get -qq install libfuse-dev libncurses5-dev
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
-        sudo pip install --upgrade pyngrok
+        # 更新ngrok到最新版本
+        curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+          | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+          && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+          | sudo tee /etc/apt/sources.list.d/ngrok.list \
+          && sudo apt update \
+          && sudo apt install ngrok
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
@@ -100,8 +106,3 @@ jobs:
     
         # This password you will use when authorizing via SSH
         SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-    
-        # Send connection info to Telegram (optional)
-        # You can find related documents here: https://core.telegram.org/bots
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
