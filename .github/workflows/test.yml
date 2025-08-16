@@ -69,13 +69,6 @@ jobs:
         sudo -E apt-get -qq install libfuse-dev libncurses5-dev
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
-        # 更新ngrok到最新版本
-        curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-          | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
-          && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
-          | sudo tee /etc/apt/sources.list.d/ngrok.list \
-          && sudo apt update \
-          && sudo apt install ngrok
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
@@ -92,7 +85,7 @@ jobs:
   
     - name: 准备阶段：是否允许通过SSH 连接到 Github Actions
       if: github.event.inputs.SSH_TO_GITHUB_ACTIONS == 'true'
-      uses: P3TERX/ssh2actions@v1.0.0
+      uses: uiouio//ssh2actions@main
       with:
         mode: ngrok
       env:
