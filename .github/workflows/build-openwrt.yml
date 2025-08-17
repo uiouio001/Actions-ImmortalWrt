@@ -290,7 +290,7 @@ jobs:
 
     - name: 准备阶段：是否允许通过SSH 连接到 Github Actions
       if: github.event.inputs.SSH_TO_GITHUB_ACTIONS == 'true'
-      uses: uiouio/ssh2actions@main
+      uses: alan6288/ssh2actions@main
       with:
         mode: ngrok
       env:
