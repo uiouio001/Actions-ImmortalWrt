@@ -36,7 +36,7 @@ env:
   DIY_P1_SH: scripts/diy-part1.sh
   DIY_P2_SH: scripts/diy-part2.sh
   FREE_DISK_SH: scripts/free-disk-space.sh
-  DEPENDS_SH: scripts/environment.sh
+  DEPENDS_SH: scripts/init_build_environment.sh
   CLASH_CORE_SH: scripts/preset-clash-core.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
@@ -63,8 +63,8 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo -E apt-get -qq update -y
-        sudo -E apt-get -qq full-upgrade -y
+        #sudo -E apt-get -qq update -y
+        #sudo -E apt-get -qq full-upgrade -y
         chmod +x $DEPENDS_SH && $DEPENDS_SH
         #sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-latest)
         #sudo -E apt-get -qq install libfuse-dev libncurses5-dev
