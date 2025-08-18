@@ -11,5 +11,5 @@
 git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 git clone https://github.com/jerrykuku/luci-app-argon-config.git package/luci-app-argon-config
 #灵缇游戏加速器
-git clone https://github.com/esirplayground/LingTiGameAcc.git lingtigameacc
+git clone https://github.com/esirplayground/LingTiGameAcc.git LingTiGameAcc
 git clone https://github.com/esirplayground/luci-app-LingTiGameAcc.git package/luci-app-LingTiGameAcc
