@@ -428,14 +428,14 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
     
-    - name: 发布阶段：删除旧发布的固件
-      uses: dev-drprasad/delete-older-releases@master
-      if: steps.compile.outputs.status == 'success' &&  env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 7
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #- name: 发布阶段：删除旧发布的固件
+    #  uses: dev-drprasad/delete-older-releases@master
+    #  if: steps.compile.outputs.status == 'success' &&  env.UPLOAD_RELEASE == 'true' && !cancelled()
+    #  with:
+    #    keep_latest: 7
+    #    delete_tags: true
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: 发布阶段：删除旧的编译过程
       uses: Mattraks/delete-workflow-runs@v2
