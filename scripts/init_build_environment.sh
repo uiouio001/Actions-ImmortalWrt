@@ -10,4 +10,5 @@ sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bis
   libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lld llvm lrzsz mkisofs msmtp \
   nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip python3-ply \
   python3-pyelftools libpython3-dev qemu-utils re2c rsync scons squashfs-tools subversion swig \
-  texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+  texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev libfuse-dev lm-sensors libpam-dev \
+  lua-cjson-dev liblzma liblzma-dev libnetsnmp wsdd2 wget-ssl luasrcdiet
