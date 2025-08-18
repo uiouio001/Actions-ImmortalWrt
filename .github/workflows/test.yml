@@ -65,6 +65,9 @@ jobs:
       run: |
         #sudo -E apt-get -qq update -y
         #sudo -E apt-get -qq full-upgrade -y
+        #sudo sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+        #sudo sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+        sudo sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
         chmod +x $DEPENDS_SH && $DEPENDS_SH
         #sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-latest)
         #sudo -E apt-get -qq install libfuse-dev libncurses5-dev
