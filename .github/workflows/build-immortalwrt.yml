@@ -146,19 +146,19 @@ jobs:
       with:
         # this might remove tools that are actually needed,
         # when set to "true" but frees about 6 GB
-        tool-cache: true
+        tool-cache: false
         # all of these default to true, but feel free to set to
         # "false" if necessary for your workflow
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        swap-storage: true
+        android: false
+        dotnet: false
+        haskell: false
+        large-packages: false
+        swap-storage: false
     
     - name: 初始化阶段：检查服务器配置和磁盘空间情况
       run: |
         # 删除大文件和文件夹
-        chmod +x $FREE_DISK_SH && $FREE_DISK_SH
+        # chmod +x $FREE_DISK_SH && $FREE_DISK_SH
 
         echo "若分配的服务器性能不足，务必及时取消，重新运行！"
         echo -e "------------------------------- CPU信息 -------------------------------\n"
@@ -174,11 +174,11 @@ jobs:
         df -Th
 
     - name: 准备阶段：克隆固件源码
-      working-directory: /workdir
+      working-directory: /builder
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
     
     - name: 准备阶段：缓存加速
       uses: klever1988/cachewrtbuild@main
@@ -287,6 +287,7 @@ jobs:
       run: |
         cd openwrt
         sed -i '/CONFIG_PACKAGE_luci-app-dockerman=y/d' .config
+        sed -i '/CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y/d' .config
 
     - name: 准备阶段：是否允许通过SSH 连接到 Github Actions
       if: github.event.inputs.SSH_TO_GITHUB_ACTIONS == 'true'
@@ -392,7 +393,8 @@ jobs:
         echo "- 🌐 登录地址: ${{ env.IP_ADDR }}" >> release.txt
         echo "- 👤 用户名: root" >> release.txt
         echo "- 🔒 密码: null" >> release.txt
-        echo "- 📒 说明: 单网口设备默认网口为LAN，旁路由模式，需要接入主路由器后进后台查找对应IP地址访问，反之双网口设备默认网口为WAN+LAN，主路由模式。 " >> release.txt
+        echo "- 📒 说明: " >> release.txt
+        echo "- 单网口设备默认网口为LAN，旁路由模式，需要接入主路由器后进后台查找对应IP地址访问，反之双网口设备默认网口为WAN+LAN，主路由模式。 " >> release.txt
         echo "- 使用WiFi驱动${{ github.event.inputs.WIFI_DRIVER }}" >> release.txt
         if [[ "${{ env.EEPROM }}" == '-eeprom' ]]; then
                echo "-    使用nx30pro高功率eeprom并固定WiFi MAC地址" >> release.txt
@@ -400,9 +402,9 @@ jobs:
                echo "-    未使用nx30pro高功率eeprom未固定WiFi MAC地址" >> release.txt
         fi
         if [[ "${{ env.WIFI_INTERFACE }}" == '-mtwifi' ]]; then
-                echo "-    使用hanwckf mtwifi-cfg原生无线控制界面" >> release.txt
+                echo "-    使用hanwckf luci-app-mtwifi-cfg无线控制界面" >> release.txt
         else
-                echo "-    使用mtk-sdk luci-app-mtk无线控制界面" >> release.txt
+                echo "-    使用mtk-sdk luci-app-mtk原生无线控制界面" >> release.txt
         fi
         if [[ "${{ env.BUILD_DOCKERMAN }}" == '-docker' ]]; then
                 echo "-    已编译luci-app-dockerman" >> release.txt
