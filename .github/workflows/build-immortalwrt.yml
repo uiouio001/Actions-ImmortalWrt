@@ -127,6 +127,7 @@ jobs:
         df -Th
 
     - name: 初始化阶段：设置编译环境
+      id: init
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -139,6 +140,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
+        echo "status=success" >> ${GITHUB_OUTPUT}
     
     - name: 初始化阶段：清理磁盘空间
       uses: jlumbroso/free-disk-space@main
