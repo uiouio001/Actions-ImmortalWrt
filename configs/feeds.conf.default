@@ -6,10 +6,6 @@ src-git-full telephony https://github.com/openwrt/telephony.git;openwrt-21.02
 #src-git modemfeed https://github.com/koshev-msk/modemfeed.git
 #Packages
 src-git kenzo https://github.com/kenzok8/openwrt-packages;master
-#Theme
-src-git argon https://github.com/jerrykuku/luci-theme-argon.git;master
-#OpenClash
-src-git openclash https://github.com/vernesong/OpenClash.git;master
 #iStoreOS
 src-git istore https://github.com/linkease/istore.git;main
 src-git quickstart https://github.com/animegasan/luci-app-quickstart.git;main
