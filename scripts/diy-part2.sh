@@ -26,8 +26,7 @@ sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/M
 sed -i 's/config internal themes/config internal themes\n    option Argon  \"\/luci-static\/argon\"/g' feeds/luci/modules/luci-base/root/etc/config/luci
 
 # 修改默认主机名
-machine_name="OpenWrt"
-sed -i 's/OpenWrt/${machine_name}/g' package/base-files/files/bin/config_generate
+#sed -i 's/OpenWrt/OpenWrt/g' package/base-files/files/bin/config_generate
 
 # 删除DDNS's示例
 sed -i '/myddns_ipv4/,$d' feeds/packages/net/ddns-scripts/files/etc/config/ddns
