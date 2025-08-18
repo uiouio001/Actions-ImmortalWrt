@@ -147,19 +147,19 @@ jobs:
       with:
         # this might remove tools that are actually needed,
         # when set to "true" but frees about 6 GB
-        tool-cache: false
+        tool-cache: true
         # all of these default to true, but feel free to set to
         # "false" if necessary for your workflow
-        android: false
-        dotnet: false
-        haskell: false
-        large-packages: false
-        swap-storage: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        swap-storage: true
     
     - name: 初始化阶段：检查服务器配置和磁盘空间情况
       run: |
         # 删除大文件和文件夹
-        # chmod +x $FREE_DISK_SH && $FREE_DISK_SH
+        chmod +x $FREE_DISK_SH && $FREE_DISK_SH
 
         echo "若分配的服务器性能不足，务必及时取消，重新运行！"
         echo -e "------------------------------- CPU信息 -------------------------------\n"
@@ -175,11 +175,11 @@ jobs:
         df -Th
 
     - name: 准备阶段：克隆固件源码
-      working-directory: /builder
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     
     - name: 准备阶段：缓存加速
       uses: klever1988/cachewrtbuild@main
