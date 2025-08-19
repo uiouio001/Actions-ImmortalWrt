@@ -7,7 +7,7 @@ src-git-full telephony https://github.com/openwrt/telephony.git;openwrt-21.02
 #Packages
 src-git kenzo https://github.com/kenzok8/openwrt-packages;master
 #iStoreOS
-#src-git istore https://github.com/linkease/istore.git;main
-#src-git third_party https://github.com/linkease/istore-packages.git;main
+src-git istore https://github.com/linkease/istore.git;main
+src-git third_party https://github.com/linkease/istore-packages.git;main
 src-git linkease_nas https://github.com/linkease/nas-packages.git;master
 src-git linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main
