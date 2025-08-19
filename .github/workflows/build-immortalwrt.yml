@@ -321,8 +321,9 @@ jobs:
       run: |
         # 执行编译
         cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
-        make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+        #echo -e "$(($(nproc)+1)) thread compile"
+        # make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+        make -j1 V=s
         # 编译后添加环境变量
         sed -n 's/.*lan) ipad=${ipaddr:-"\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\)"} ;;.*/\1/p' package/base-files/files/bin/config_generate | head -n 1 > IP_ADDR
         [ -s IP_ADDR ] && echo "IP_ADDR=$(cat IP_ADDR)" >> $GITHUB_ENV
