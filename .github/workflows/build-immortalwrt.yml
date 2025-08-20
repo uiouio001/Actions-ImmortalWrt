@@ -387,7 +387,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         touch release.txt
-        echo -e "${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}" >> release.txt
+        #echo -e "${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}-${{ env.FILE_DATE }}" >> release.txt
         echo "- 💻 CPU架构: ${{ matrix.ARCHITECTURE }}" >> release.txt
         echo "- 📂 使用源码：${{ env.REPO_URL }}" >> release.txt
         echo "- 🌳 使用分支：${{ matrix.REPO_BRANCH }}" >> release.txt
@@ -415,7 +415,7 @@ jobs:
         fi
         max_frequency=$(($(grep -oP "max-frequency = <\K[0-9]*" openwrt/target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7981-cmcc-rax3000m-emmc.dts) / 1000000))
         echo "-    使用闪存频率: ${max_frequency}MHz" >> release.txt
-        echo "release_tag=${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}" >> $GITHUB_OUTPUT
+        echo "release_tag=${{ env.OPENWRT_NAME }}-${{ env.UPLOAD_TAG_NAME }}-${{ env.FILE_DATE }}" >> $GITHUB_OUTPUT
         echo "status=success" >> ${GITHUB_OUTPUT}
 
     - name: 发布阶段：发布固件至Release
@@ -425,7 +425,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: ${{ env.FIRMWARE }}/*
-        name: ${{ env.FILE_DATE }}
+        name: ${{ steps.tag.outputs.release_tag }}
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
     
