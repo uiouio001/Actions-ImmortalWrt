@@ -32,6 +32,9 @@ sed -i '/set luci.main.mediaurlbase=\/luci-static\/bootstrap/d' feeds/luci/theme
 sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 sed -i 's/config internal themes/config internal themes\n    option Argon  \"\/luci-static\/argon\"/g' feeds/luci/modules/luci-base/root/etc/config/luci
 
+#修改默认语言
+sed -i 's/auto/zh_cn/g' openwrt/feeds/luci/modules/luci-base/root/etc/config/luci
+
 # 修改默认主机名（不能纯数字或者使用中文）
 #sed -i 's/OpenWrt/OpenWrt/g' package/base-files/files/bin/config_generate
 
