@@ -5,11 +5,12 @@
 #===============================================
 
 #==============添加feed源地址===================
-#Argon Theme
-#sed -i '1i src-git argon https://github.com/jerrykuku/luci-theme-argon.git;master' feeds.conf.default
-#sed -i '1i src-git argon-config https://github.com/jerrykuku/luci-app-argon-config.git;master' feeds.conf.default
-git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
-git clone https://github.com/jerrykuku/luci-app-argon-config.git package/luci-app-argon-config
-#灵缇游戏加速器
-git clone https://github.com/esirplayground/LingTiGameAcc.git package/LingTiGameAcc
-git clone https://github.com/esirplayground/luci-app-LingTiGameAcc.git package/luci-app-LingTiGameAcc
+#Kenzok's常用软件包
+#echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages.git;master' >>feeds.conf.default
+#echo 'src-git small https://github.com/kenzok8/small.git;master' >>feeds.conf.default
+#灵缇游戏加速器(feeds.conf.default中istore-packages.git已经包含luci-app-LingTiGameAcc,但不包含依赖项LingTiGameAcc)
+#git clone https://github.com/esirplayground/luci-app-LingTiGameAcc.git feeds/third_party/luci-app-LingTiGameAcc
+git clone https://github.com/esirplayground/LingTiGameAcc.git feeds/third_party/LingTiGameAcc
+
+#==============删除重复feed源===================
+#rm -rf feeds/third_party/luci-app-LingTiGameAcc
